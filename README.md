@@ -1,0 +1,1 @@
+it has to do with two roles lecturer and the students, lecturer upload assignment and grade student and also comment the assignment base on how student does it. and student submit their assignment and view scoes graded by the lecturer and recieve feedback from lecturers and see available assignment in a list form 
