@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Lecturer Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  /* Dashboard Watermark */
+  .dashboard-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  .dashboard-wrapper::before {
+    content: "ABU Assignment Portal";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 6rem;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .dashboard-content {
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-6 dashboard-wrapper">
+  <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-6xl transition dashboard-content">
+
+    <!-- Django messages -->
+    {% if messages %}
+    <div id="messages">
+      {% for message in messages %}
+        <div class="p-4 mb-4 text-sm text-green-900 rounded-lg bg-green-100 shadow border border-green-300 flex items-center gap-2 animate-fade-in">
+          ✅ {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      setTimeout(function(){
+        let messages = document.getElementById('messages');
+        if (messages) {
+          messages.style.transition = "opacity 1s ease";
+          messages.style.opacity = "0";
+          setTimeout(()=> messages.style.display = "none", 1000);
+        }
+      }, 3000);
+    </script>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h2 class="text-4xl font-extrabold text-green-700">👨‍🏫 Welcome, {{ request.user.username }}</h2>
+      <p class="text-gray-600 mt-3 text-lg">Manage assignments and student submissions easily from your dashboard.</p>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+      <!-- Upload Assignment -->
+      <a href="{% url 'upload_assignment' %}" 
+         class="action-card bg-green-100 hover:bg-green-200 rounded-xl shadow-md p-6 text-center transition transform hover:-translate-y-2 hover:shadow-xl">
+        <div class="text-5xl mb-3">📤</div>
+        <h3 class="text-xl font-bold text-green-700">Upload Assignment</h3>
+        <p class="text-gray-600 mt-2">Easily create and share assignments with your students.</p>
+      </a>
+
+      <!-- Send Feedback -->
+      {% if submissions and submissions.0.id %}
+        <a href="{% url 'give_feedback' submissions.0.id %}" 
+           class="action-card bg-yellow-100 hover:bg-yellow-200 rounded-xl shadow-md p-6 text-center transition transform hover:-translate-y-2 hover:shadow-xl">
+          <div class="text-5xl mb-3">💬</div>
+          <h3 class="text-xl font-bold text-yellow-700">Send Feedback</h3>
+          <p class="text-gray-600 mt-2">Give personalized guidance to students.</p>
+        </a>
+      {% else %}
+        <div class="action-card bg-gray-200 opacity-70 rounded-xl shadow-md p-6 text-center">
+          <div class="text-5xl mb-3">💬</div>
+          <h3 class="text-xl font-bold text-gray-500">Send Feedback</h3>
+          <p class="text-gray-400 mt-2">No submissions available yet.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Assignments Toggle Section -->
+    <div class="mt-12 text-center">
+      <button id="toggleAssignments" 
+              class="px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700 transition transform hover:scale-105">
+        📚 Show Assignments
+      </button>
+    </div>
+
+    <!-- Hidden Assignments List -->
+    <div id="assignmentsList" class="mt-6 hidden animate-fade-in">
+      <h3 class="text-2xl font-bold text-green-700 mb-6 text-center">📌 Available Assignments</h3>
+      {% if assignments %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {% for assignment in assignments %}
+            <div class="bg-white rounded-xl p-6 shadow-md border border-green-200 hover:shadow-lg transition transform hover:-translate-y-1">
+              <h4 class="text-lg font-bold text-green-700">{{ assignment.title }}</h4>
+              <p class="text-gray-600 text-sm mt-2">{{ assignment.description|truncatewords:20 }}</p>
+              <p class="text-sm text-gray-500 mt-3">⏰ Deadline: 
+                <span class="font-semibold text-red-500">{{ assignment.deadline }}</span>
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-gray-500 italic text-center mt-4">No assignments uploaded yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Student Submissions Section -->
+    <h3 class="text-2xl font-bold text-green-700 mt-12 mb-6">📑 Student Submissions</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr class="bg-green-100">
+            <th class="border border-gray-300 px-4 py-2">Student</th>
+            <th class="border border-gray-300 px-4 py-2">File</th>
+            <th class="border border-gray-300 px-4 py-2">Grade</th>
+            <th class="border border-gray-300 px-4 py-2">Feedback</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions %}
+          <tr>
+            <td class="border border-gray-300 px-4 py-2">{{ submission.student.username }}</td>
+            <td class="border border-gray-300 px-4 py-2">
+              <a href="{{ submission.submitted_file.url }}" 
+                 class="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700"
+                 download>📥 Download</a>
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+              {{ submission.grade|default:"Not graded" }}
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+              <a href="{% url 'grade_submission' submission.id %}" 
+                 class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
+                Grade
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center py-4">No submissions yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.getElementById("toggleAssignments").addEventListener("click", function() {
+    const list = document.getElementById("assignmentsList");
+    if (list.classList.contains("hidden")) {
+      list.classList.remove("hidden");
+      this.textContent = "📚 Hide Assignments";
+    } else {
+      list.classList.add("hidden");
+      this.textContent = "📚 Show Assignments";
+    }
+  });
+</script>
+{% endblock %}

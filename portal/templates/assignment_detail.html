@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Assignment Details{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <h2 class="text-2xl font-bold">{{ assignment.title }}</h2>
+    <p class="mt-2 text-gray-600">{{ assignment.description }}</p>
+    <p class="mt-1 text-sm text-gray-500">Deadline: {{ assignment.deadline }}</p>
+
+    <h3 class="mt-6 text-xl font-semibold">Submissions</h3>
+    <ul class="mt-2">
+        {% for submission in submissions %}
+            <li class="p-2 border rounded mb-2">
+                <strong>{{ submission.student.user.username }}</strong> - 
+                {{ submission.submitted_file.url|default:"No file" }}
+                {% if submission.grade %}
+                    <span class="ml-4">Grade: {{ submission.grade }}</span>
+                {% else %}
+                    <a href="{% url 'grade_submission' submission.id %}" class="text-blue-600 underline">
+                        Grade
+                    </a>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>No submissions yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

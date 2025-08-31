@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-100 via-green-200 to-green-300 p-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <!-- Logo / Header -->
+    <div class="text-center mb-6">
+      <img src="{% static 'images/abu_logo.jpg' %}" alt="ABU Logo" class="mx-auto w-16 h-16 mb-2">
+      <h2 class="text-3xl font-extrabold text-green-800">Welcome Back</h2>
+      <p class="text-gray-600 text-sm">Login to continue</p>
+    </div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div>
+        <input type="text" name="username" placeholder="Username"
+          value="{{ form.username.value|default_if_none:'' }}"
+          class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:outline-none" required>
+        {% if form.username.errors %}
+          <p class="text-red-600 text-sm mt-1 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 5a7 7 0 11-7 7 7 7 0 017-7z" />
+            </svg>
+            {{ form.username.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- Password -->
+      <div>
+        <input type="password" name="password" placeholder="Password"
+          class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:outline-none" required>
+        {% if form.password.errors %}
+          <p class="text-red-600 text-sm mt-1 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 5a7 7 0 11-7 7 7 7 0 017-7z" />
+            </svg>
+            {{ form.password.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- General (non-field) errors -->
+      {% if form.non_field_errors %}
+        <p class="text-red-600 text-sm mt-2 flex items-center">
+          <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 5a7 7 0 11-7 7 7 7 0 017-7z" />
+          </svg>
+          {{ form.non_field_errors.0 }}
+        </p>
+      {% endif %}
+
+      <!-- Submit Button -->
+      <button type="submit"
+        class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-lg transition duration-300 shadow-md">
+        Login
+      </button>
+    </form>
+
+    <!-- Footer / Redirect -->
+    <p class="text-center text-sm text-gray-600 mt-6">
+      Don’t have an account?
+      <a href="{% url 'register' %}" class="text-green-700 font-semibold hover:underline">Register here</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

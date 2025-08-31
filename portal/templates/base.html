@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Assignment Portal{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ABU Favicon -->
+  <link rel="icon" type="image/png" href="{% static 'images/abu_logo.jpg' %}">
+
+  <style>
+    /* Watermark styling */
+    body::before {
+      content: "ABU Assignment Portal";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      font-size: 4rem;
+      color: rgba(0, 0, 0, 0.05);
+      z-index: -1;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    /* Scroll-to-top button */
+    #scrollTopBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      padding: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s ease;
+    }
+    #scrollTopBtn:hover {
+      background: #15803d;
+    }
+  </style>
+</head>
+<body class="bg-green-50 text-gray-900 font-sans">
+
+<!-- Navbar -->
+<nav id="navbar" class="bg-green-700 p-4 flex justify-between items-center shadow-lg sticky top-0 z-50 transition-shadow duration-300">
+  <div class="flex items-center space-x-3">
+    <img src="{% static 'images/abu_logo.jpg' %}" alt="ABU Logo" class="h-10 w-10 rounded-full border-2 border-white">
+    <a href="{% url 'index' %}" class="text-white font-bold text-lg hover:text-yellow-300 transition">
+      ABU Assignment Portal
+    </a>
+  </div>
+  <div class="flex items-center space-x-4">
+    {% if user.is_authenticated %}
+      {% if user.role == "student" %}
+        <a href="{% url 'student_dashboard' %}" class="text-white hover:text-yellow-300">Dashboard</a>
+      {% elif user.role == "lecturer" %}
+        <a href="{% url 'lecturer_dashboard' %}" class="text-white hover:text-yellow-300">Dashboard</a>
+      {% endif %}
+      <a href="{% url 'logout' %}" class="px-3 py-1 bg-red-500 rounded-md text-white hover:bg-red-600 transition">
+        Logout
+      </a>
+    {% else %}
+      <a href="{% url 'login' %}" class="px-3 py-1 bg-white text-green-700 rounded-md hover:bg-green-100 transition">
+        Login
+      </a>
+      <a href="{% url 'register' %}" class="px-3 py-1 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition">
+        Register
+      </a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="bg-green-600 text-white text-center py-12 shadow-md">
+  <h1 class="text-3xl md:text-4xl font-bold">Welcome to ABU Assignment Portal</h1>
+  <p class="mt-2 text-lg text-yellow-200">Smart, Simple & Seamless Submission for Students and Lecturers</p>
+</section>
+
+<!-- Content -->
+<div class="p-6 min-h-screen">
+  {% if messages %}
+    <div id="message-container">
+      {% for message in messages %}
+        <div class="mb-4 p-3 rounded {{ message.tags }} bg-green-100 text-green-800">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</div>
+
+<!-- Footer -->
+<footer class="bg-green-700 text-white text-center p-4 mt-10 shadow-md">
+  &copy; <span id="year"></span> Ahmadu Bello University, Zaria. All Rights Reserved.
+</footer>
+
+<!-- Scroll-to-top button -->
+<button id="scrollTopBtn">⬆</button>
+
+<!-- JS Features -->
+<script>
+  // Auto-dismiss messages
+  setTimeout(() => {
+    const messages = document.getElementById("message-container");
+    if (messages) {
+      messages.style.transition = "opacity 0.5s ease";
+      messages.style.opacity = "0";
+      setTimeout(() => messages.remove(), 500);
+    }
+  }, 4000);
+
+  // Auto-update footer year
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Sticky navbar shadow effect
+  window.addEventListener("scroll", () => {
+    const navbar = document.getElementById("navbar");
+    if (window.scrollY > 50) {
+      navbar.classList.add("shadow-2xl");
+    } else {
+      navbar.classList.remove("shadow-2xl");
+    }
+  });
+
+  // Scroll-to-top button
+  const scrollTopBtn = document.getElementById("scrollTopBtn");
+  window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      scrollTopBtn.style.display = "block";
+    } else {
+      scrollTopBtn.style.display = "none";
+    }
+  };
+  scrollTopBtn.onclick = function() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+</script>
+
+</body>
+</html>
